@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flores_gio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center bottom, #1a2332 0%, #0f1419 50%, #000000 100%);
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .message-container {
+            position: relative;
+            z-index: 100;
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .message-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            animation: fadeInDown 1.5s ease-out;
+        }
+
+        .message-text {
+            font-size: 1.4rem;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            line-height: 1.6;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .flower {
+            position: absolute;
+            animation: growIn 2.5s ease-out forwards;
+            opacity: 0;
+            transform: scale(0) translateY(20px);
+            animation-delay: var(--delay, 0s);
+        }
+
+        .stem {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: var(--stem-height, 120px);
+            background: linear-gradient(to top, #2d5016, #4a7c59);
+            border-radius: 2px;
+            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .flower-head {
+            position: absolute;
+            top: calc(var(--stem-height, 120px) * -1);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .flower-center {
+            width: var(--center-size, 25px);
+            height: var(--center-size, 25px);
+            background: radial-gradient(circle, #8B4513 30%, #654321 100%);
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+            border: 1px solid #5D4037;
+        }
+
+        .petal {
+            position: absolute;
+            width: var(--petal-width, 15px);
+            height: var(--petal-height, 35px);
+            background: linear-gradient(to top, #FFD700 0%, #FFFF99 50%, #FFF8DC 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 50%;
+            left: 50%;
+            transform-origin: 50% 100%;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            filter: brightness(1.2);
+        }
+
+        .leaf {
+            position: absolute;
+            width: 20px;
+            height: 40px;
+            background: linear-gradient(45deg, #228B22, #32CD32, #90EE90);
+            border-radius: 0 100% 0 100%;
+            transform-origin: bottom center;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        .leaf:nth-child(1) {
+            bottom: 40%;
+            left: -15px;
+            transform: rotate(-30deg);
+        }
+
+        .leaf:nth-child(2) {
+            bottom: 60%;
+            right: -15px;
+            transform: rotate(30deg);
+        }
+
+        .grass {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to top, #0d4f2c 0%, transparent 100%);
+            z-index: 1;
+        }
+
+        .grass-blade {
+            position: absolute;
+            width: 3px;
+            height: var(--blade-height, 40px);
+            background: linear-gradient(to top, #1a5e2f, #2d7d3a, #4a9b5e);
+            border-radius: 50% 50% 0 0;
+            bottom: 0;
+            transform: rotate(var(--rotation, 0deg));
+            animation: grassSway 4s ease-in-out infinite;
+            animation-delay: var(--sway-delay, 0s);
+        }
+
+        .floating-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .particle {
+            position: absolute;
+            width: var(--particle-size, 4px);
+            height: var(--particle-size, 4px);
+            background: var(--particle-color, #FFD700);
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+            opacity: 0.8;
+            box-shadow: 0 0 10px var(--particle-color, #FFD700);
+            animation-delay: var(--float-delay, 0s);
+        }
+
+        @keyframes growIn {
+            0% {
+                opacity: 0;
+                transform: scale(0) translateY(50px);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.1) translateY(0px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0px);
+            }
+        }
+
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px) translateX(var(--drift, 50px)) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes grassSway {
+            0%, 100% {
+                transform: rotate(var(--rotation, 0deg));
+            }
+            25% {
+                transform: rotate(calc(var(--rotation, 0deg) + 5deg));
+            }
+            75% {
+                transform: rotate(calc(var(--rotation, 0deg) - 5deg));
+            }
+        }
+
+        @keyframes flowerSway {
+            0%, 100% {
+                transform: translateX(-50%) rotate(0deg);
+            }
+            25% {
+                transform: translateX(-50%) rotate(2deg);
+            }
+            75% {
+                transform: translateX(-50%) rotate(-2deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .message-box {
+                margin: 0 15px;
+                padding: 20px;
+            }
+            
+            .message-text {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .message-container {
+                margin-top: 20px;
+            }
+            
+            .message-text {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grass"></div>
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="message-container">
+        <div class="message-box">
+            <div class="message-text">
+                Tal vez no sean flores fisicas pero las hice para que no seas espectadora✨
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Crear flores con diferentes tamaños y alturas
+        function createFlower(x, y, size = 'medium', delay = 0) {
+            const flower = document.createElement('div');
+            flower.className = 'flower';
+            flower.style.left = x + 'px';
+            flower.style.bottom = y + 'px';
+            flower.style.setProperty('--delay', delay + 's');
+            
+            // Configurar tamaños según el tipo
+            let stemHeight, centerSize, petalWidth, petalHeight, petalCount;
+            switch(size) {
+                case 'small':
+                    stemHeight = 80;
+                    centerSize = 15;
+                    petalWidth = 8;
+                    petalHeight = 20;
+                    petalCount = 6;
+                    break;
+                case 'large':
+                    stemHeight = 180;
+                    centerSize = 35;
+                    petalWidth = 20;
+                    petalHeight = 50;
+                    petalCount = 8;
+                    break;
+                default: // medium
+                    stemHeight = 130;
+                    centerSize = 25;
+                    petalWidth = 15;
+                    petalHeight = 35;
+                    petalCount = 7;
+            }
+            
+            flower.style.setProperty('--stem-height', stemHeight + 'px');
+            flower.style.setProperty('--center-size', centerSize + 'px');
+            flower.style.setProperty('--petal-width', petalWidth + 'px');
+            flower.style.setProperty('--petal-height', petalHeight + 'px');
+            
+            // Crear tallo
+            const stem = document.createElement('div');
+            stem.className = 'stem';
+            
+            // Crear hojas
+            const leaf1 = document.createElement('div');
+            const leaf2 = document.createElement('div');
+            leaf1.className = 'leaf';
+            leaf2.className = 'leaf';
+            stem.appendChild(leaf1);
+            stem.appendChild(leaf2);
+            
+            // Crear cabeza de flor
+            const flowerHead = document.createElement('div');
+            flowerHead.className = 'flower-head';
+            
+            const center = document.createElement('div');
+            center.className = 'flower-center';
+            
+            // Crear pétalos
+            for (let i = 0; i < petalCount; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.style.transform = `translate(-50%, -100%) rotate(${i * (360 / petalCount)}deg)`;
+                center.appendChild(petal);
+            }
+            
+            flowerHead.appendChild(center);
+            flower.appendChild(stem);
+            flower.appendChild(flowerHead);
+            document.body.appendChild(flower);
+            
+            // Añadir movimiento suave después de la animación inicial
+            setTimeout(() => {
+                flowerHead.style.animation = 'flowerSway 6s ease-in-out infinite';
+                flowerHead.style.animationDelay = Math.random() * 2 + 's';
+            }, (delay + 2.5) * 1000);
+        }
+
+        // Crear hierba
+        function createGrassBlades() {
+            const grassContainer = document.querySelector('.grass');
+            const width = window.innerWidth;
+            
+            for (let i = 0; i < 50; i++) {
+                const blade = document.createElement('div');
+                blade.className = 'grass-blade';
+                blade.style.left = (i * (width / 50)) + Math.random() * 20 + 'px';
+                blade.style.setProperty('--blade-height', (20 + Math.random() * 40) + 'px');
+                blade.style.setProperty('--rotation', (Math.random() * 10 - 5) + 'deg');
+                blade.style.setProperty('--sway-delay', Math.random() * 4 + 's');
+                grassContainer.appendChild(blade);
+            }
+        }
+
+        // Crear partículas flotantes
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            
+            // Diferentes tipos de partículas
+            const types = [
+                { color: '#FFD700', size: 3 },
+                { color: '#FFFF00', size: 2 },
+                { color: '#FFA500', size: 4 },
+                { color: '#90EE90', size: 2 }
+            ];
+            
+            const type = types[Math.floor(Math.random() * types.length)];
+            particle.style.setProperty('--particle-color', type.color);
+            particle.style.setProperty('--particle-size', type.size + 'px');
+            particle.style.setProperty('--drift', (Math.random() * 100 - 50) + 'px');
+            particle.style.setProperty('--float-delay', Math.random() * 3 + 's');
+            
+            document.getElementById('particles').appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.remove();
+                }
+            }, 11000);
+        }
+
+        // Posicionar flores de manera responsiva con mayor cantidad
+        function positionFlowers() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // Limpiar flores existentes
+            document.querySelectorAll('.flower').forEach(el => el.remove());
+            
+            // Crear múltiples grupos de flores
+            const flowerGroups = [
+                // Grupo izquierdo
+                { x: width * 0.15, y: 50, size: 'large', delay: 0.5 },
+                { x: width * 0.08, y: 30, size: 'medium', delay: 1.2 },
+                { x: width * 0.22, y: 35, size: 'small', delay: 1.8 },
+                { x: width * 0.12, y: 15, size: 'small', delay: 2.3 },
+                
+                // Grupo centro-izquierdo
+                { x: width * 0.35, y: 60, size: 'medium', delay: 0.8 },
+                { x: width * 0.28, y: 25, size: 'large', delay: 1.5 },
+                { x: width * 0.42, y: 40, size: 'small', delay: 2.1 },
+                { x: width * 0.31, y: 10, size: 'small', delay: 2.7 },
+                
+                // Grupo centro
+                { x: width * 0.5, y: 45, size: 'large', delay: 1.0 },
+                { x: width * 0.47, y: 20, size: 'medium', delay: 1.6 },
+                { x: width * 0.53, y: 25, size: 'small', delay: 2.4 },
+                
+                // Grupo centro-derecho
+                { x: width * 0.65, y: 55, size: 'medium', delay: 0.7 },
+                { x: width * 0.72, y: 30, size: 'large', delay: 1.4 },
+                { x: width * 0.58, y: 15, size: 'small', delay: 2.0 },
+                { x: width * 0.69, y: 10, size: 'small', delay: 2.8 },
+                
+                // Grupo derecho
+                { x: width * 0.85, y: 50, size: 'large', delay: 0.6 },
+                { x: width * 0.92, y: 35, size: 'medium', delay: 1.3 },
+                { x: width * 0.78, y: 20, size: 'small', delay: 1.9 },
+                { x: width * 0.88, y: 15, size: 'small', delay: 2.5 },
+                
+                // Flores adicionales dispersas
+                { x: width * 0.25, y: 70, size: 'small', delay: 3.0 },
+                { x: width * 0.75, y: 65, size: 'small', delay: 3.2 },
+                { x: width * 0.40, y: 75, size: 'medium', delay: 3.5 },
+                { x: width * 0.60, y: 70, size: 'small', delay: 3.8 },
+            ];
+            
+            flowerGroups.forEach(flower => {
+                if (flower.x > 30 && flower.x < width - 30) {
+                    createFlower(flower.x, flower.y, flower.size, flower.delay);
+                }
+            });
+        }
+
+        // Inicializar
+        createGrassBlades();
+        positionFlowers();
+        
+        // Crear partículas continuamente
+        setInterval(createParticle, 600);
+        
+        // Reposicionar en cambio de tamaño
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Limpiar hierba existente
+                document.querySelector('.grass').innerHTML = '';
+                createGrassBlades();
+                positionFlowers();
+            }, 300);
+        });
+        
+        // Efecto de hover en el mensaje
+        const messageBox = document.querySelector('.message-box');
+        messageBox.addEventListener('mouseenter', () => {
+            messageBox.style.transform = 'scale(1.02)';
+            messageBox.style.transition = 'transform 0.3s ease';
+            messageBox.style.boxShadow = '0 12px 40px rgba(255, 215, 0, 0.2)';
+        });
+        
+        messageBox.addEventListener('mouseleave', () => {
+            messageBox.style.transform = 'scale(1)';
+            messageBox.style.boxShadow = '0 8px 32px rgba(255, 215, 0, 0.1)';
+        });
+    </script>
+</body>
+</html>
